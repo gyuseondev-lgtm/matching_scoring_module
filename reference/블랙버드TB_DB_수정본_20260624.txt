@@ -1,0 +1,170 @@
+
+- TB
+DB : maraiadb
+IP:PORT : 121.126.223.191:31306
+DB : blackbird
+ID/PW : emgram/dparmfoa21@!
+
+- PRD
+DB : maraiadb
+IP:PORT : 43.200.47.93:31306
+DB : blackbird
+ID/PW : prod_emgram/mr23!dk84e$m
+
+-- blackbird.vehicle_types : 차종코드
+-- 차종
+select * from syscode where code_categ = 'CAR_TYPE'
+
+-- blackbird.tour_themes : 카테고리별로 있는건 아니고, 자유투어(사용자가코스짜기), 추천투어(패키지상품)
+select * from syscode where code_categ = 'RESV_TYPE'
+
+-- blackbird.languages : 언어코드
+select * from syscode where code_categ = 'LNG'
+
+-- partner
+select * from partner where partner_type = 'DRIVER'	-- 택시기사
+select * from partner where partner_type = 'PRIVATE'	-- 개인 드라이버/차량 공급업체
+select * from partner where partner_type = 'GUIDE'	-- 가이드(로직이 있었다고는 함, 오래되서 수정해야 할듯.)
+
+-- blackbird.vehicles : 신규추가
+-- blackbird.resource_availability : 신규추가
+-- matching_candidates : 신규추가
+
+-- blackbird.tour_requests, blackbird.reservations
+select * from resv_info
+--------------------------------------------------------------------------------------------------------------------
+* 여행카테고리 데이터 추가(TOUR_TYPE)
+INSERT INTO syscode (code_categ,code_id,code_name, order_no,create_dt,update_dt) VALUES
+	 ('TOUR_TYPE', 'ACTIVE', '액티비티 여행', 1, now(), now()),
+	 ('TOUR_TYPE', 'RELAXATION', '휴식 여행', 2, now(), now()),
+	 ('TOUR_TYPE', 'FOOD', '미식 투어', 3, now(), now()),
+	 ('TOUR_TYPE', 'LOCAL', '현지체험 여행', 4, now(), now()),
+	 ('TOUR_TYPE', 'NATURE', '대자연 여행', 5, now(), now()),
+	 ('TOUR_TYPE', 'CITY', '대도시 여행', 6, now(), now()),
+	 ('TOUR_TYPE', 'FAMILY', '가족 여행', 7, now(), now()),
+	 ('TOUR_TYPE', 'KIDS', '아이 동반 여행', 8, now(), now()),
+	 ('TOUR_TYPE', 'SENIOR', '부모님 효도 관광', 9, now(), now()),
+	 ('TOUR_TYPE', 'HISTORY', '역사, 문화 탐방 여행', 10, now(), now()),
+	 ('TOUR_TYPE', 'LUXURY', '최고급 플렉스 여행', 10, now(), now());
+--------------------------------------------------------------------------------------------------------------------
+CREATE TABLE blackbird.vehicles (
+    `id` bigint AUTO_INCREMENT PRIMARY KEY COMMENT '차량ID',
+    `vehicle_name` varchar(100) NOT NULL COMMENT '차량명',
+    `vehicle_type` varchar(50) NOT NULL COMMENT '차종타입코드',
+    `car_number` varchar(50) NOT NULL COMMENT '차량번호',
+    `approval_status` varchar(50) NOT NULL COMMENT '승인상태',
+    `operation_status` varchar(50) NOT NULL COMMENT '운영상태',
+    `base_region_code` varchar(50) NOT NULL COMMENT '주활동지역코드',
+    `seat_count` int DEFAULT 0 COMMENT '좌석여유',
+    `luggage_capacity` int DEFAULT 0 COMMENT '적재량',
+    `model_name` varchar(100) NOT NULL COMMENT '모델명',
+    `model_year` char(4) NOT NULL COMMENT '연식',
+    `is_premium` tinyint(1) DEFAULT 0 COMMENT '프리미엄여부',
+    `has_child_seat` tinyint(1) DEFAULT 0 COMMENT '카시트여부',
+    `price_per_day` int(11) DEFAULT 0 COMMENT '1일가격',
+    `price_per_hour` int(11) DEFAULT 0 COMMENT '시간당가격',
+    `rating_avg` int DEFAULT 0 COMMENT '평점',
+    `review_count` int DEFAULT 0 COMMENT '리뷰횟수',
+    `avg_response_minutes` int DEFAULT 0 COMMENT '평균응답시간',
+    `cancel_count` int DEFAULT 0 COMMENT '취소횟수',
+    `no_show_count` int DEFAULT 0 COMMENT '노쇼횟수',
+    `complaint_count` int DEFAULT 0 COMMENT '컴플레인횟수',
+    `create_dt` datetime DEFAULT NULL COMMENT '생성일자',
+    `update_dt` datetime DEFAULT NULL COMMENT '수정일자',
+    FOREIGN KEY (base_region_code) REFERENCES platform_region(region_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='차량정보';
+
+INSERT INTO blackbird.vehicles (vehicle_name,vehicle_type,car_number,approval_status,operation_status,base_region_code,seat_count,luggage_capacity,model_name,model_year,is_premium,has_child_seat,price_per_day,price_per_hour,rating_avg,review_count,avg_response_minutes,cancel_count,no_show_count,complaint_count,create_dt,update_dt) VALUES
+	 ('그랜저 하이브리드','M001','123가1234','APPROVED','ACTIVE','50000',5,400,'그랜저','2023',1,0,80000,9000,5,24,15,1,0,0,'2026-06-19 11:38:06','2026-06-19 11:38:06'),
+	 ('소나타 디 엣지','PA001','56저7890','APPROVED','ACTIVE','50000',5,380,'쏘나타','2024',0,1,65000,7500,4,12,8,0,0,1,'2026-06-19 11:38:06','2026-06-19 11:38:06'),
+	 ('아반떼 CN7','M001','34너5678','APPROVED','ACTIVE','50000',5,350,'아반떼','2022',0,0,50000,6000,4,45,5,2,1,0,'2026-06-19 11:38:06','2026-06-19 11:38:06'),
+	 ('G80 스포츠','PT001','99우1111','APPROVED','ACTIVE','50000',5,420,'G80','2023',1,0,180000,22000,5,37,7,0,0,0,'2026-06-19 11:38:06','2026-06-19 11:38:06'),
+	 ('팰리세이드 3.8','PT003','98하1122','APPROVED','ACTIVE','50000',7,600,'팰리세이드','2023',1,1,120000,15000,5,18,20,0,0,0,'2026-06-19 11:38:06','2026-06-19 11:38:06'),
+	 ('싼타페 MX5','PT003','45호3344','APPROVED','ACTIVE','50000',5,550,'싼타페','2024',0,1,95000,11000,3,6,30,1,0,2,'2026-06-19 11:38:06','2026-06-19 11:38:06'),
+	 ('GV80 3.5T','PT003','88주2222','APPROVED','ACTIVE','50000',6,650,'GV80','2024',1,1,220000,26000,5,14,9,1,0,0,'2026-06-19 11:38:06','2026-06-19 11:38:06'),
+	 ('토레스 하이브리드','PT003','33러9999','APPROVED','ACTIVE','50000',5,520,'토레스','2024',0,0,85000,9500,4,11,19,1,0,1,'2026-06-19 11:38:06','2026-06-19 11:38:06'),
+	 ('카니발 9인승','PT003','89러9900','APPROVED','ACTIVE','50000',9,800,'카니발','2022',1,1,140000,18000,5,50,10,3,0,1,'2026-06-19 11:38:06','2026-06-19 11:38:06'),
+	 ('스타리아 라운지','PT004','11조1235','APPROVED','ACTIVE','50000',9,850,'스타리아','2023',1,0,130000,16000,4,15,25,1,1,0,'2026-06-19 11:38:06','2026-06-19 11:38:06'),
+	 ('카니발 하이리무진','PT004','77호5566','APPROVED','ACTIVE','50000',7,750,'카니발','2024',1,1,180000,21000,5,8,12,0,0,0,'2026-06-19 11:38:06','2026-06-19 11:38:06'),
+	 ('스타리아 투어러','PT004','23하4455','APPROVED','ACTIVE','50000',11,900,'스타리아','2022',0,0,110000,13000,4,19,17,2,0,0,'2026-06-19 11:38:06','2026-06-19 11:38:06'),
+	 ('쏠라티 15인승','PT005','42너1133','APPROVED','ACTIVE','50000',15,1200,'쏠라티','2024',1,1,250000,30000,4,21,14,1,0,0,'2026-06-19 11:38:06','2026-06-19 11:38:06'),
+	 ('카운티 뉴 브리즈','PT005','62다4455','APPROVED','ACTIVE','50000',25,1800,'카운티','2023',0,0,350000,40000,5,11,22,0,0,0,'2026-06-19 11:38:06','2026-06-19 11:38:06'),
+	 ('르노 마스터 버스','PT005','15러7788','APPROVED','ACTIVE','50000',15,1300,'마스터','2022',0,0,220000,25000,4,16,19,1,0,1,'2026-06-19 11:38:06','2026-06-19 11:38:06'),
+	 ('선롱 두에고','PT005','38주9900','APPROVED','INACTIVE','50000',25,2000,'두에고','2021',0,0,300000,35000,3,5,30,2,1,2,'2026-06-19 11:38:06','2026-06-19 11:38:06'),
+	 ('현대 유니버스 45인승','M004','71가8899','APPROVED','ACTIVE','50000',45,3000,'유니버스','2023',1,0,550000,65000,5,14,25,0,0,0,'2026-06-19 11:38:06','2026-06-19 11:38:06'),
+	 ('기아 그랜버드 45인승','M004','82나1122','APPROVED','ACTIVE','50000',45,3200,'그랜버드','2024',1,0,580000,70000,5,9,18,0,0,0,'2026-06-19 11:38:06','2026-06-19 11:38:06'),
+	 ('현대 에어로타운','M004','53다3344','APPROVED','ACTIVE','50000',35,2500,'에어로타운','2022',0,0,450000,50000,4,7,28,1,0,0,'2026-06-19 11:38:06','2026-06-19 11:38:06'),
+	 ('자일대우 BX212','M004','29라5566','PENDING','READY','50000',45,3500,'BX212','2023',1,0,600000,75000,0,0,0,0,0,0,'2026-06-19 11:38:06','2026-06-19 11:38:06');
+---------------------------------------------------------------------------------------------------------------------------------------
+-- partner_id, partner_no 필드 추가
+resource_id => vehicle_id 로 변경
+CREATE TABLE blackbird.resource_availability (
+    id bigint AUTO_INCREMENT PRIMARY KEY COMMENT '이용가능ID',
+    resource_type varchar(50) NOT NULL COMMENT '리소스타입',
+    vehicle_id bigint DEFAULT NULL COMMENT '차량ID',
+    partner_id varchar(50) DEFAULT NULL COMMENT '파트너ID',
+    partner_no int(11) DEFAULT NULL COMMENT '파트너No',
+    available_date date NOT NULL COMMENT '이용가능일자',
+    start_time time NOT NULL COMMENT '이용가능시작시간',
+    end_time time NOT NULL COMMENT '이용가능종료시간',
+    status varchar(50) NOT NULL COMMENT '상태',
+    create_dt datetime DEFAULT NULL COMMENT '생성일자',
+    update_dt datetime DEFAULT NULL COMMENT '수정일자'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='이용가능정보';
+
+INSERT INTO blackbird.resource_availability (resource_type,vehicle_id,partner_id,partner_no,available_date,start_time,end_time,status,create_dt,update_dt) VALUES
+	 ('VEHICLE',5,NULL,NULL,'2026-06-15','09:00:00','18:00:00','ACTIVE','2026-06-15 11:49:51','2026-06-15 11:49:51'),
+	 ('DRIVER',NULL,'cjcodriver01',315,'2026-06-15','09:00:00','18:00:00','ACTIVE','2026-06-15 11:49:51','2026-06-15 11:49:51'),
+	 ('VEHICLE',1,NULL,NULL,'2026-07-10','09:00:00','18:00:00','ACTIVE','2026-06-19 11:49:51','2026-06-19 11:49:51'),
+	 ('VEHICLE',2,NULL,NULL,'2026-07-10','09:00:00','18:00:00','ACTIVE','2026-06-19 11:49:51','2026-06-19 11:49:51'),
+	 ('VEHICLE',3,NULL,NULL,'2026-07-10','08:00:00','22:00:00','ACTIVE','2026-06-19 11:49:51','2026-06-19 11:49:51'),
+	 ('VEHICLE',4,NULL,NULL,'2026-07-10','09:00:00','18:00:00','ACTIVE','2026-06-19 11:49:51','2026-06-19 11:49:51'),
+	 ('VEHICLE',5,NULL,NULL,'2026-07-10','09:00:00','15:00:00','ACTIVE','2026-06-19 11:49:51','2026-06-19 11:49:51'),
+	 ('VEHICLE',6,NULL,NULL,'2026-07-10','10:00:00','20:00:00','ACTIVE','2026-06-19 11:49:51','2026-06-19 11:49:51'),
+	 ('VEHICLE',7,NULL,NULL,'2026-07-10','09:00:00','18:00:00','ACTIVE','2026-06-19 11:49:51','2026-06-19 11:49:51'),
+	 ('GUIDE',NULL,'dodo122',841,'2026-07-10','07:00:00','23:00:00','ACTIVE','2026-06-19 11:49:51','2026-06-19 11:49:51');
+---------------------------------------------------------------------------------------------------------------------------------------
+참조테이블 tour_requests(id) => resv_info(reserve_id, user_no)), 필드도 변경
+guide_id, driver_id : bigint => varchar(50)
+user_no, guide_no, driver_no 필드 추가
+CREATE TABLE blackbird.matching_candidates (
+    id bigint AUTO_INCREMENT PRIMARY KEY COMMENT '매칭ID',
+    reserve_id varchar(100) NOT NULL COMMENT '예약ID',
+    user_no int(11) NOT NULL COMMENT '사용자키',
+    guide_id varchar(50) DEFAULT NULL COMMENT '가이드ID',
+    guide_no int(11) DEFAULT NULL COMMENT '가이드사용자키',
+    vehicle_id bigint DEFAULT NULL COMMENT '차종ID',
+    driver_id varchar(50) DEFAULT NULL COMMENT '드라이버ID',
+    driver_no int(11) DEFAULT NULL COMMENT '드라이버사용자키',
+    guide_score decimal(5,2) DEFAULT 0.00 COMMENT '가이드스코어',
+    vehicle_score decimal(5,2) DEFAULT 0.00 COMMENT '차량스코어',
+    driver_score decimal(5,2) DEFAULT 0.00 COMMENT '드라이버스코어',
+    price_score decimal(5,2) DEFAULT 0.00 COMMENT '가격스코어',
+    total_score decimal(5,2) DEFAULT 0.00 COMMENT '종합스코어',
+    guide_price int(11) DEFAULT 0 COMMENT '가이드비용',
+    vehicle_price int(11) DEFAULT 0 COMMENT '차량비용',
+    driver_price int(11) DEFAULT 0 COMMENT '드라이버용',
+    total_price int(11) DEFAULT 0 COMMENT '총비용',
+    rank_no int DEFAULT 0 COMMENT '랭크',
+    candidate_status varchar(50) DEFAULT NULL COMMENT '매칭상태',
+    is_recommended tinyint(1) DEFAULT 0 COMMENT '추천여부',
+    is_selected tinyint(1) DEFAULT 0 COMMENT '재투어여부',
+    expires_at datetime DEFAULT NULL COMMENT '유효일자',
+    created_at datetime DEFAULT NULL COMMENT '생성일자',
+    FOREIGN KEY (reserve_id, user_no) REFERENCES resv_info(reserve_id, user_no)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='투어매칭정보';
+
+INSERT INTO blackbird.matching_candidates (reserve_id,user_no,guide_id,guide_no,vehicle_id,driver_id,driver_no,guide_score,vehicle_score,driver_score,price_score,total_score,guide_price,vehicle_price,driver_price,total_price,rank_no,candidate_status,is_recommended,is_selected,expires_at,created_at) VALUES
+	 ('20260612-30315521',815,'g0002',230,1,'cjdriver01',365,95.50,90.00,92.00,85.00,90.62,200000,80000,250000,530000,1,'SELECTED',1,1,'2026-06-20 13:45:26','2026-06-19 13:39:15'),
+	 ('20260612-30303762',815,'gndg3000',201,2,'cjjbdriver02',352,88.00,85.00,85.00,95.00,88.25,300000,65000,200000,565000,2,'OFFERED',0,0,'2026-06-20 13:45:26','2026-06-19 13:39:15'),
+	 ('20260612-30287011',1009,'guide100',149,4,'cjjbdriver03',358,89.00,90.00,90.00,80.00,87.25,240000,180000,260000,680000,3,'OFFERED',1,1,'2026-06-20 13:45:26','2026-06-19 13:39:15'),
+	 ('20260612-30274581',815,NULL,NULL,1,'cjudriver02',385,0.00,90.00,92.00,85.00,89.00,0,65000,200000,265000,1,'CANCELLED',1,1,'2026-06-20 13:45:26','2026-06-19 13:45:26'),
+	 ('20260605-30246864',1536,NULL,NULL,2,'delete01',830,0.00,85.00,85.00,95.00,88.33,230000,140000,300000,670000,2,'CANCELLED',0,0,'2026-06-20 13:45:26','2026-06-19 13:45:26'),
+	 ('20260604-30233530',1014,NULL,NULL,4,'didi123',840,0.00,90.00,90.00,80.00,86.66,130000,250000,220000,600000,3,'CANCELLED',1,0,'2026-06-20 13:45:26','2026-06-19 13:45:26'),
+	 ('20260601-30170591',1014,'kimg01',179,9,'dlatl01',189,90.50,91.00,94.00,85.00,90.12,230000,140000,320000,690000,1,'SELECTED',1,1,'2026-06-20 16:22:21','2026-06-19 16:22:21'),
+	 ('20260520-30024347',1118,'kimgui',232,13,'dodo122',841,89.00,72.00,85.00,82.00,82.00,130000,250000,380000,760000,1,'SELECTED',0,0,'2026-06-23 10:50:36','2026-06-22 10:50:36'),
+	 ('20260520-30011133',1009,NULL,NULL,5,'driveJeju12345',1216,0.00,91.00,90.50,80.00,87.16,0,120000,320000,440000,1,'SELECTED',1,0,'2026-06-14 11:11:12','2026-06-14 11:11:12'),
+	 ('20260515-29854261',1536,'picg2',163,11,'driveLa0585',1194,95.50,90.00,92.00,85.00,90.62,210000,180000,300000,690000,1,'OFFERED',1,1,'2026-06-20 13:45:26','2026-06-19 13:39:15'),
+	 ('20260512-29799914',980,NULL,NULL,9,'driver01',198,0.00,91.00,92.00,85.00,89.33,0,140000,300000,440000,1,'OFFERED',1,1,'2026-06-22 13:45:26','2026-06-12 13:39:15'),
+	 ('20260515-29847285',1009,NULL,NULL,11,'driver3',143,0.00,90.00,88.00,84.00,87.33,0,180000,320000,500000,2,'OFFERED',1,1,'2026-06-22 13:45:26','2026-06-12 13:39:15');
+---------------------------------------------------------------------------------------------------------------------------------------
