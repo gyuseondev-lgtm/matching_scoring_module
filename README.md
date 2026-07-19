@@ -4,7 +4,7 @@
 
 **서버에서 전달한 Bootstrap 설정으로 화면, 내비게이션과 화면 이동을 구성할 수 있음을 확인했습니다.**
 
-현재 검증에서는 실제 서버 응답과 같은 형식의 로컬 JSON을 서버 응답으로 가정하여 `fetch`했습니다. 클라이언트는 응답의 `routes`, `pages`, `bottomNavigation`을 해석하여 UI를 구성합니다.
+검증에서는 실제 서버 응답과 같은 형식의 로컬 JSON을 서버 응답으로 가정하여 `fetch`했습니다. 클라이언트는 전달받은 json의 `routes`, `pages`, `bottomNavigation`을 확인하여 UI를 구성합니다.
 
 ## 2. 화면 구성
 
